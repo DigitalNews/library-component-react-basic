@@ -12,18 +12,23 @@ import DefaultContext, { IContext } from "./Context";
 
 interface IProviderProps {
   context?: React.Context<IContext>;
+  templateModal: FunctionComponent<any>;
+  templateConfirm: FunctionComponent<any>;
+  templateAlert: FunctionComponent<any>;
   children: React.ReactNode;
 }
 
 export interface BasicComponentProps {
   key: string;
   option: "modal" | "confirm" | "alert";
-  Template: FunctionComponent<any>;
   props: any;
 }
 
 const Provider = ({
   context: Context = DefaultContext,
+  templateAlert: TemplateAlert,
+  templateConfirm: TemplateConfirm,
+  templateModal: TemplateModal,
   children,
 }: IProviderProps) => {
   const root = useRef<HTMLDivElement | null>(null);
@@ -74,47 +79,45 @@ const Provider = ({
       resolve(true);
       remove(basic);
     },
-    [resolve]
+    [resolve, remove]
   );
 
   const removeAll = useCallback(() => {
     basicContext?.current.basic.forEach(remove);
   }, [remove]);
 
-  const show = () =>
-    useCallback(
-      (props: any, option: "confirm" | "modal" | "alert", Template: any) => {
-        const key = Math.random().toString(36).substr(2, 9);
+  const show = useCallback(
+    (props: any, option: "confirm" | "modal" | "alert") => {
+      const key = Math.random().toString(36).substr(2, 9);
 
-        // console.log('bug props', props);
-        const basic = {
-          key,
-          option,
-          Template,
-          props: {
-            ...props,
-            open: true,
-            onClose: () => remove(basic),
-          },
-        };
+      // console.log('bug props', props);
+      const basic = {
+        key,
+        option,
+        props: {
+          ...props,
+          open: true,
+          onClose: () => remove(basic),
+        },
+      };
 
-        if (option === "confirm") {
-          return new Promise((resolve, reject) => {
-            setResolveReject([resolve, reject]);
-            setBasic((state) =>
-              state.concat({
-                ...basic,
-                props: { ...props },
-              })
-            );
-          });
-        }
+      if (option === "confirm") {
+        return new Promise((resolve, reject) => {
+          setResolveReject([resolve, reject]);
+          setBasic((state) =>
+            state.concat({
+              ...basic,
+              props: { ...props },
+            })
+          );
+        });
+      }
 
-        setBasic((state) => state.concat(basic));
-        return basic;
-      },
-      [remove]
-    );
+      setBasic((state) => state.concat(basic));
+      return basic;
+    },
+    [remove]
+  );
 
   basicContext.current = {
     basic,
@@ -143,31 +146,25 @@ const Provider = ({
                   >
                     {basic
                       .filter((e) => e.option === "alert")
-                      .map((e) => (
-                        <e.Template {...e.props} />
+                      .map((e, i) => (
+                        <TemplateAlert key={i} {...e.props} />
                       ))}
                   </div>
                 );
               } else if (e.option === "modal") {
-                return <e.Template key={e.key} {...e.props} />;
-              } else if (e.option === "confirm") {
-                return (
-                  <e.Template
-                    key={e.key}
-                    open={resolveReject.length === 2}
-                    onClose={() => remove(e)}
-                    onCancel={() => handleCancel(e)}
-                    onConfirm={() => handleConfirm(e)}
-                    {...e.props}
-                  />
-                );
-              } else {
-                {
-                  throw new Error(
-                    "no se selecciono ningún tipo de template a mostrar"
-                  );
-                }
+                return <TemplateModal key={e.key} {...e.props} />;
               }
+
+              return (
+                <TemplateConfirm
+                  key={e.key}
+                  open={resolveReject.length === 2}
+                  onClose={() => remove(e)}
+                  onCancel={() => handleCancel(e)}
+                  onConfirm={() => handleConfirm(e)}
+                  {...e.props}
+                />
+              );
             })}
           </Fragment>,
           root.current

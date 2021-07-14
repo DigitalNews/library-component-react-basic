@@ -1,9 +1,8 @@
-import { FunctionComponent, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import DefaultContext from "./Context";
 import { BasicComponentProps } from "./Provider";
 
 const useBasic = <A>(
-  template: FunctionComponent<A>,
   type: "confirm" | "modal" | "alert"
 ): {
   show: (
@@ -20,13 +19,10 @@ const useBasic = <A>(
 
   return {
     show: (props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">) =>
-      basic.show(props, type, template),
+      basic.show(props, type),
     remove: basic.remove,
     removeAll: basic.removeAll,
   };
 };
-
-// const hola = useBasic("confirm")
-// hola.show({})
 
 export default useBasic;
