@@ -1,15 +1,16 @@
-import { createContext } from "react";
+import { createContext, FunctionComponent } from "react";
 import { BasicComponentProps } from "./Provider";
 
 export interface IContext {
-  show?: (
-    props: any,
-    option: "confirm" | "modal" | "alert"
+  show: <T>(
+    props: Omit<T, "open" | "onClose" | "onCancel" | "onConfirm">,
+    option: "confirm" | "modal" | "alert",
+    template: FunctionComponent<T>
   ) => void | Promise<boolean>;
   remove?: (basic: BasicComponentProps) => void;
   removeAll?: () => void;
 }
 
-const Context = createContext<IContext>({});
+const Context = createContext<IContext>({} as any);
 
 export default Context;

@@ -4,6 +4,7 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  FunctionComponent,
 } from "react";
 import { createPortal } from "react-dom";
 import DefaultContext, { IContext } from "./Context";
@@ -11,26 +12,19 @@ import DefaultContext, { IContext } from "./Context";
 
 interface IProviderProps {
   context?: React.Context<IContext>;
-  templateAlert: any;
-  templateModal: any;
-  templateConfirm: any;
   children: React.ReactNode;
 }
 
 export interface BasicComponentProps {
   key: string;
   option: "modal" | "confirm" | "alert";
-  onClose?: () => void;
-  onCancel?: () => void;
-  onConfirm?: () => void;
+  Template: FunctionComponent<any>;
+  props: any;
 }
 
 const Provider = ({
   context: Context = DefaultContext,
   children,
-  templateAlert: AlertTemplate,
-  templateModal: ModalTemplate,
-  templateConfirm: ConfirmTemplate,
 }: IProviderProps) => {
   const root = useRef<HTMLDivElement | null>(null);
   const basicContext = useRef<any>(null);
@@ -38,7 +32,7 @@ const Provider = ({
   const [basic, setBasic] = useState<Array<BasicComponentProps>>([]);
 
   const [resolveReject, setResolveReject] = useState<any[]>([]);
-  const [resolve, reject] = resolveReject;
+  const [resolve] = resolveReject;
 
   useEffect(() => {
     root.current = document.createElement("div");
@@ -58,8 +52,8 @@ const Provider = ({
       const lengthBeforeRemove = currentAlerts.length;
       const filteredAlerts = currentAlerts.filter((a) => a.key !== basic.key);
 
-      if (lengthBeforeRemove > filteredAlerts.length && basic.onClose) {
-        basic.onClose();
+      if (lengthBeforeRemove > filteredAlerts.length && basic.props.onClose) {
+        basic.props.onClose();
       }
 
       return filteredAlerts;
@@ -69,10 +63,10 @@ const Provider = ({
   const handleCancel = useCallback(
     (basic: BasicComponentProps) => {
       // console.log('cancelando...', resolveReject);
-      reject(false);
+      resolve(false);
       remove(basic);
     },
-    [reject, remove]
+    [resolve, remove]
   );
 
   const handleConfirm = useCallback(
@@ -87,30 +81,40 @@ const Provider = ({
     basicContext?.current.basic.forEach(remove);
   }, [remove]);
 
-  const show = useCallback(
-    (props: any, option: "confirm" | "modal" | "alert") => {
-      const key = Math.random().toString(36).substr(2, 9);
+  const show = () =>
+    useCallback(
+      (props: any, option: "confirm" | "modal" | "alert", Template: any) => {
+        const key = Math.random().toString(36).substr(2, 9);
 
-      // console.log('bug props', props);
-      const basic = {
-        key,
-        option,
-        ...props,
-        onClose: () => remove(basic),
-      };
+        // console.log('bug props', props);
+        const basic = {
+          key,
+          option,
+          Template,
+          props: {
+            ...props,
+            open: true,
+            onClose: () => remove(basic),
+          },
+        };
 
-      if (option === "confirm") {
-        return new Promise((resolve, reject) => {
-          setResolveReject([resolve, reject]);
-          setBasic((state) => state.concat(basic));
-        });
-      }
+        if (option === "confirm") {
+          return new Promise((resolve, reject) => {
+            setResolveReject([resolve, reject]);
+            setBasic((state) =>
+              state.concat({
+                ...basic,
+                props: { ...props },
+              })
+            );
+          });
+        }
 
-      setBasic((state) => state.concat(basic));
-      return basic;
-    },
-    [remove]
-  );
+        setBasic((state) => state.concat(basic));
+        return basic;
+      },
+      [remove]
+    );
 
   basicContext.current = {
     basic,
@@ -140,20 +144,21 @@ const Provider = ({
                     {basic
                       .filter((e) => e.option === "alert")
                       .map((e) => (
-                        <AlertTemplate {...e} />
+                        <e.Template {...e.props} />
                       ))}
                   </div>
                 );
               } else if (e.option === "modal") {
-                return <ModalTemplate {...e} />;
+                return <e.Template key={e.key} {...e.props} />;
               } else if (e.option === "confirm") {
                 return (
-                  <ConfirmTemplate
+                  <e.Template
+                    key={e.key}
                     open={resolveReject.length === 2}
                     onClose={() => remove(e)}
                     onCancel={() => handleCancel(e)}
                     onConfirm={() => handleConfirm(e)}
-                    {...e}
+                    {...e.props}
                   />
                 );
               } else {
