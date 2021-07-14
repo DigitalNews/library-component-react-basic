@@ -1,11 +1,12 @@
 {
-  "name": "basic-component",
+  "name": "basic-component-react",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "build": "npx tsc -p ."
+    "build": "npx tsc -p .",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "",
