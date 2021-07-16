@@ -1,6 +1,6 @@
 {
   "name": "basic-component-react",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "homepage": "https://github.com/DigitalNews/library-component-react-basic",
   "main": "build/index.js",
