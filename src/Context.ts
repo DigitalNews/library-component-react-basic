@@ -4,7 +4,8 @@ import { BasicComponentProps } from "./Provider";
 export interface IContext {
   show: <T>(
     props: Omit<T, "open" | "onClose" | "onCancel" | "onConfirm">,
-    option: "confirm" | "modal" | "alert"
+    option: "confirm" | "modal" | "alert",
+    key?: string
   ) => void | Promise<boolean>;
   remove?: (basic: BasicComponentProps) => void;
   removeAll?: () => void;

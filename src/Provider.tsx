@@ -51,16 +51,14 @@ const Provider = ({
     };
   }, []);
 
-  const remove = useCallback((basic: BasicComponentProps) => {
+  const remove = useCallback((key: string) => {
     setResolveReject([]);
     setBasic((currentAlerts) => {
-      const lengthBeforeRemove = currentAlerts.length;
-      const filteredAlerts = currentAlerts.filter((a) => a.key !== basic.key);
-
-      if (lengthBeforeRemove > filteredAlerts.length && basic.props.onClose) {
-        basic.props.onClose();
-      }
-
+      // const lengthBeforeRemove = currentAlerts.length;
+      const filteredAlerts = currentAlerts.filter((a) => a.key !== key);
+      // if (lengthBeforeRemove > filteredAlerts.length && basic.props.onClose) {
+      //   basic.props.onClose();
+      // }
       return filteredAlerts;
     });
   }, []);
@@ -69,7 +67,7 @@ const Provider = ({
     (basic: BasicComponentProps) => {
       // console.log('cancelando...', resolveReject);
       resolve(false);
-      remove(basic);
+      remove(basic.key);
     },
     [resolve, remove]
   );
@@ -77,7 +75,7 @@ const Provider = ({
   const handleConfirm = useCallback(
     (basic: BasicComponentProps) => {
       resolve(true);
-      remove(basic);
+      remove(basic.key);
     },
     [resolve, remove]
   );
@@ -87,17 +85,17 @@ const Provider = ({
   }, [remove]);
 
   const show = useCallback(
-    (props: any, option: "confirm" | "modal" | "alert") => {
-      const key = Math.random().toString(36).substr(2, 9);
+    (props: any, option: "confirm" | "modal" | "alert", key?: string) => {
+      const keyAuto = key || Math.random().toString(36).substr(2, 9);
 
       // console.log('bug props', props);
       const basic = {
-        key,
+        key: keyAuto,
         option,
         props: {
           ...props,
           open: true,
-          onClose: () => remove(basic),
+          onClose: () => remove(basic.key),
         },
       };
 
@@ -160,7 +158,7 @@ const Provider = ({
                 <TemplateConfirm
                   key={e.key}
                   open={resolveReject.length === 2}
-                  onClose={() => remove(e)}
+                  onClose={() => remove(e.key)}
                   onCancel={() => handleCancel(e)}
                   onConfirm={() => handleConfirm(e)}
                   {...e.props}

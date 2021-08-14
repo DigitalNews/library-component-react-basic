@@ -6,7 +6,8 @@ const useBasic = <A>(
   type: "confirm" | "modal" | "alert"
 ): {
   show: (
-    props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">
+    props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">,
+    key?: string
   ) => void | Promise<boolean>;
   remove?: (alert: BasicComponentProps) => void;
   removeAll?: () => void;
@@ -18,8 +19,10 @@ const useBasic = <A>(
   }, [basicContext]);
 
   return {
-    show: (props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">) =>
-      basic.show(props, type),
+    show: (
+      props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">,
+      key?: string
+    ) => basic.show(props, type, key),
     remove: basic.remove,
     removeAll: basic.removeAll,
   };
