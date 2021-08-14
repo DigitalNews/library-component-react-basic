@@ -7,8 +7,8 @@ export interface IContext {
     option: "confirm" | "modal" | "alert",
     key?: string
   ) => void | Promise<boolean>;
-  remove?: (basic: BasicComponentProps) => void;
-  removeAll?: () => void;
+  remove: (key: string) => void;
+  removeAll: () => void;
 }
 
 const Context = createContext<IContext>({} as any);

@@ -9,8 +9,8 @@ const useBasic = <A>(
     props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">,
     key?: string
   ) => void | Promise<boolean>;
-  remove?: (alert: BasicComponentProps) => void;
-  removeAll?: () => void;
+  remove: (key: string) => void;
+  removeAll: () => void;
 } => {
   const basicContext = useContext(DefaultContext);
 
