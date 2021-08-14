@@ -51,14 +51,17 @@ const Provider = ({
     };
   }, []);
 
-  const remove = useCallback((key: string) => {
+  const remove = useCallback((basic: BasicComponentProps) => {
     setResolveReject([]);
     setBasic((currentAlerts) => {
-      // const lengthBeforeRemove = currentAlerts.length;
-      const filteredAlerts = currentAlerts.filter((a) => a.key !== key);
-      // if (lengthBeforeRemove > filteredAlerts.length && basic.props.onClose) {
-      //   basic.props.onClose();
-      // }
+      const lengthBeforeRemove = currentAlerts.length;
+      const filteredAlerts = currentAlerts.filter((a) => a.key !== basic.key);
+      if (lengthBeforeRemove > filteredAlerts.length) {
+        let basicfilter = currentAlerts.filter((e) => e.key === basic.key)[0];
+        if (basicfilter.props.onClose) {
+          basicfilter.props.onClose();
+        }
+      }
       return filteredAlerts;
     });
   }, []);
@@ -67,7 +70,7 @@ const Provider = ({
     (basic: BasicComponentProps) => {
       // console.log('cancelando...', resolveReject);
       resolve(false);
-      remove(basic.key);
+      remove(basic);
     },
     [resolve, remove]
   );
@@ -75,7 +78,7 @@ const Provider = ({
   const handleConfirm = useCallback(
     (basic: BasicComponentProps) => {
       resolve(true);
-      remove(basic.key);
+      remove(basic);
     },
     [resolve, remove]
   );
@@ -95,7 +98,7 @@ const Provider = ({
         props: {
           ...props,
           open: true,
-          onClose: () => remove(basic.key),
+          onClose: () => remove(basic),
         },
       };
 
@@ -158,7 +161,7 @@ const Provider = ({
                 <TemplateConfirm
                   key={e.key}
                   open={resolveReject.length === 2}
-                  onClose={() => remove(e.key)}
+                  onClose={() => remove(e)}
                   onCancel={() => handleCancel(e)}
                   onConfirm={() => handleConfirm(e)}
                   {...e.props}

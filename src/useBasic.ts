@@ -1,6 +1,5 @@
 import { useContext, useMemo } from "react";
 import DefaultContext from "./Context";
-import { BasicComponentProps } from "./Provider";
 
 const useBasic = <A>(
   type: "confirm" | "modal" | "alert"
@@ -23,7 +22,7 @@ const useBasic = <A>(
       props: Omit<A, "open" | "onClose" | "onCancel" | "onConfirm">,
       key?: string
     ) => basic.show(props, type, key),
-    remove: basic.remove,
+    remove: (key: string) => basic.remove({ key: key }),
     removeAll: basic.removeAll,
   };
 };

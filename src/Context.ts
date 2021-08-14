@@ -7,7 +7,7 @@ export interface IContext {
     option: "confirm" | "modal" | "alert",
     key?: string
   ) => void | Promise<boolean>;
-  remove: (key: string) => void;
+  remove: (basic: Omit<BasicComponentProps, "option" | "props">) => void;
   removeAll: () => void;
 }
 
